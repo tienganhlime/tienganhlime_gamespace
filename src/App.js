@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback} from 'react';
 import { Play, Users, Plus, Trash2, Save, FolderOpen, History, Loader2 } from 'lucide-react';
 import { database, ref, set, onValue, push, get, remove } from './firebase.js';
 import confetti from 'canvas-confetti';
@@ -427,7 +427,7 @@ function StudentPanel({ onBack }) {
   }, [step, pin, gameData?.currentQuestionIndex, gameData]);
 
   // TIMER ĐỒNG BỘ
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (isSubmitting || !answer.trim() || remainingTime <= 0) return;
     setIsSubmitting(true);
 
@@ -437,24 +437,6 @@ function StudentPanel({ onBack }) {
       return;
     }
 
-  useEffect(() => {
-    if (!gameData?.currentQuestionStartTime || !gameData?.timeLimit) return;
-    clearInterval(timerRef.current);
-    const start = gameData.currentQuestionStartTime;
-    const limitSec = gameData.timeLimit * 60;
-
-    timerRef.current = setInterval(() => {
-      const left = Math.max(0, limitSec - (Date.now() - start) / 1000);
-      setRemainingTime(Math.ceil(left));
-      if (left <= 0 && answer.trim() && !isSubmitting) {
-        handleSubmit();
-      }
-    }, 500);
-
-    return () => clearInterval(timerRef.current);
-  }, [gameData?.currentQuestionIndex, gameData?.currentQuestionStartTime, gameData?.timeLimit, answer, isSubmitting, handleSubmit]);
-
-  
     const q = gameData.questions[gameData.currentQuestionIndex];
     const results = await gradeWithGroqAPI(q.question, q.criteria, lines);
 
@@ -481,7 +463,26 @@ function StudentPanel({ onBack }) {
     setAnswer('');
     setIsSubmitting(false);
     confetti({ particleCount: 100 });
-  };
+  }, [isSubmitting, answer, remainingTime, gameData, pin, name]);
+
+  useEffect(() => {
+    if (!gameData?.currentQuestionStartTime || !gameData?.timeLimit) return;
+    clearInterval(timerRef.current);
+    const start = gameData.currentQuestionStartTime;
+    const limitSec = gameData.timeLimit * 60;
+
+    timerRef.current = setInterval(() => {
+      const left = Math.max(0, limitSec - (Date.now() - start) / 1000);
+      setRemainingTime(Math.ceil(left));
+      if (left <= 0 && answer.trim() && !isSubmitting) {
+        handleSubmit();
+      }
+    }, 500);
+
+    return () => clearInterval(timerRef.current);
+  }, [gameData?.currentQuestionIndex, gameData?.currentQuestionStartTime, gameData?.timeLimit, answer, isSubmitting, handleSubmit]);
+
+  
 
   // Dữ liệu hiện tại
   const currentQ = gameData?.questions?.[gameData.currentQuestionIndex];
