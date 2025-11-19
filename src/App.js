@@ -427,6 +427,16 @@ function StudentPanel({ onBack }) {
   }, [step, pin, gameData?.currentQuestionIndex, gameData]);
 
   // TIMER ĐỒNG BỘ
+  const handleSubmit = async () => {
+    if (isSubmitting || !answer.trim() || remainingTime <= 0) return;
+    setIsSubmitting(true);
+
+    const lines = answer.split('\n').map(l => l.trim()).filter(l => l.length > 3);
+    if (lines.length === 0) {
+      setIsSubmitting(false);
+      return;
+    }
+
   useEffect(() => {
     if (!gameData?.currentQuestionStartTime || !gameData?.timeLimit) return;
     clearInterval(timerRef.current);
@@ -444,16 +454,7 @@ function StudentPanel({ onBack }) {
     return () => clearInterval(timerRef.current);
   }, [gameData?.currentQuestionIndex, gameData?.currentQuestionStartTime, gameData?.timeLimit, answer, isSubmitting, handleSubmit]);
 
-  const handleSubmit = async () => {
-    if (isSubmitting || !answer.trim() || remainingTime <= 0) return;
-    setIsSubmitting(true);
-
-    const lines = answer.split('\n').map(l => l.trim()).filter(l => l.length > 3);
-    if (lines.length === 0) {
-      setIsSubmitting(false);
-      return;
-    }
-
+  
     const q = gameData.questions[gameData.currentQuestionIndex];
     const results = await gradeWithGroqAPI(q.question, q.criteria, lines);
 
