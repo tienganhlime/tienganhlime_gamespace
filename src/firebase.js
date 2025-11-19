@@ -14,7 +14,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const database = getDatabase(app);
 
 export { database, ref, set, onValue, push, get, remove };
+export const analytics = getAnalytics(app);

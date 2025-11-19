@@ -442,7 +442,7 @@ function StudentPanel({ onBack }) {
     }, 500);
 
     return () => clearInterval(timerRef.current);
-  }, [gameData?.currentQuestionIndex, gameData?.currentQuestionStartTime, gameData?.timeLimit, answer, isSubmitting]);
+  }, [gameData?.currentQuestionIndex, gameData?.currentQuestionStartTime, gameData?.timeLimit, answer, isSubmitting, handleSubmit]);
 
   const handleSubmit = async () => {
     if (isSubmitting || !answer.trim() || remainingTime <= 0) return;
